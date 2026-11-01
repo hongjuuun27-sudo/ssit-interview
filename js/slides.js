@@ -99,6 +99,7 @@
     showAnswer = on;
     if (on) timerPause();
     $("slides").classList.toggle("show-answer", on);
+    $("sTimer").hidden = !!on; // 답변=읽기용: 타이머 완전 숨김 (캐시된 CSS에도 안전)
     $("sTabSlide").setAttribute("aria-pressed", String(!on));
     $("sTabAnswer").setAttribute("aria-pressed", String(on));
     $("title").textContent = on ? "발표 답변" : "발표 자료";

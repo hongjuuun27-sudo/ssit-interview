@@ -231,7 +231,7 @@ body.is-slides .topbar { background: #1e1b4b; }
 .s-tab[aria-pressed="true"] { background: #fff; color: #1e1b4b; }
 .s-answer { display: none; }
 .slides-view.show-answer .slide-grid { display: none; }
-.slides-view.show-answer .s-timer { display: none; }
+.slides-view.show-answer .s-timer, #sTimer[hidden] { display: none !important; }
 .slides-view.show-answer .s-answer {
   display: block; background: #fff; border-radius: 12px; padding: 14px 16px;
   border-left: 5px solid #0f766e; box-shadow: 0 1px 3px rgba(0,0,0,.08);
