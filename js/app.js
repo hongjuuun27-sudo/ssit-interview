@@ -209,6 +209,7 @@
 
   // ---- 홈 기타 버튼 ----
   $("shuffleBtn").addEventListener("click", function () { location.hash = "#/shuffle"; });
+  $("slidesBtn").addEventListener("click", function () { location.hash = "#/slides"; });
   $("backBtn").addEventListener("click", function () { location.hash = "#/"; });
   $("resetProgressBtn").addEventListener("click", function () {
     if (confirm("연습 진도를 모두 초기화할까요?")) {
@@ -221,10 +222,14 @@
   // ---- 라우팅 ----
   function showView(name) {
     var practice = name === "practice";
-    $("home").hidden = practice;
+    var slides = name === "slides";
+    $("home").hidden = name !== "home";
     $("practice").hidden = !practice;
+    $("slides").hidden = !slides;
     $("pager").hidden = !practice;
-    $("backBtn").hidden = !practice;
+    $("backBtn").hidden = name === "home";
+    if (slides) { timerReset(); window.SlidesMode.enter(); return; }
+    window.SlidesMode.leave();
     if (!practice) {
       timerReset();
       $("title").textContent = "SSIT 면접 연습";
@@ -243,6 +248,10 @@
         startDeck(ALL.filter(function (x) { return x.chNo === ch.no; }), ch.no + ". " + ch.title);
         return;
       }
+    }
+    if (h === "#/slides") {
+      showView("slides");
+      return;
     }
     if (h === "#/shuffle") {
       showView("practice");
