@@ -210,6 +210,7 @@
   // ---- 홈 기타 버튼 ----
   $("shuffleBtn").addEventListener("click", function () { location.hash = "#/shuffle"; });
   $("slidesBtn").addEventListener("click", function () { location.hash = "#/slides"; });
+  $("answersBtn").addEventListener("click", function () { location.hash = "#/answers"; });
   $("backBtn").addEventListener("click", function () { location.hash = "#/"; });
   $("resetProgressBtn").addEventListener("click", function () {
     if (confirm("연습 진도를 모두 초기화할까요?")) {
@@ -220,7 +221,7 @@
   });
 
   // ---- 라우팅 ----
-  function showView(name) {
+  function showView(name, answer) {
     var practice = name === "practice";
     var slides = name === "slides";
     $("home").hidden = name !== "home";
@@ -228,7 +229,7 @@
     $("slides").hidden = !slides;
     $("pager").hidden = !practice;
     $("backBtn").hidden = name === "home";
-    if (slides) { timerReset(); window.SlidesMode.enter(); return; }
+    if (slides) { timerReset(); window.SlidesMode.enter(answer); return; }
     window.SlidesMode.leave();
     if (!practice) {
       timerReset();
@@ -249,8 +250,8 @@
         return;
       }
     }
-    if (h === "#/slides") {
-      showView("slides");
+    if (h === "#/slides" || h === "#/answers") {
+      showView("slides", h === "#/answers");
       return;
     }
     if (h === "#/shuffle") {

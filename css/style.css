@@ -170,6 +170,9 @@ body {
 .mode-tile:active { background: var(--primary-press); }
 .mode-slides { background: #7c3aed; }
 .mode-slides:active { background: #6d28d9; }
+.mode-wide { grid-column: 1 / -1; min-height: 88px; }
+.mode-answers { background: #0f766e; }
+.mode-answers:active { background: #115e59; }
 .mode-icon { font-size: 26px; line-height: 1.2; }
 .mode-name { font-size: 19px; font-weight: 800; }
 .mode-sub { font-size: 13px; opacity: .85; line-height: 1.35; }
@@ -216,6 +219,25 @@ body.is-slides .topbar { background: #1e1b4b; }
 .s-card-list li { font-size: 15px; line-height: 1.6; word-break: keep-all; }
 .s-card-list li + li { margin-top: 4px; }
 .s-card-list li::marker { color: var(--c); }
+/* 슬라이드 / 발표 답변 전환 */
+.s-tabs {
+  flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  padding: 8px 14px; background: #1e1b4b;
+}
+.s-tab {
+  min-height: 40px; border: 0; border-radius: 10px; font: inherit; font-size: 15px; font-weight: 700;
+  background: rgba(255,255,255,.08); color: #c7d2fe; cursor: pointer; touch-action: manipulation;
+}
+.s-tab[aria-pressed="true"] { background: #fff; color: #1e1b4b; }
+.s-answer { display: none; }
+.slides-view.show-answer .slide-grid { display: none; }
+.slides-view.show-answer .s-answer {
+  display: block; background: #fff; border-radius: 12px; padding: 14px 16px;
+  border-left: 5px solid #0f766e; box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.s-answer-title { margin: 0 0 8px; font-size: 16px; font-weight: 800; color: #0f766e; }
+.s-answer p { margin: 0; font-size: 17px; line-height: 1.75; word-break: keep-all; }
+.s-answer p + p { margin-top: 12px; }
 .slide-foot { margin-top: auto; text-align: right; font-size: 12px; color: #6b7280; }
 
 .slides-footer {
@@ -258,11 +280,15 @@ body.is-slides .topbar { background: #1e1b4b; }
   .s-card-2 { --c: #fbbf24; }
   .s-card-3 { --c: #a78bfa; }
   .slide-foot { color: #94a3b8; }
+  .slides-view.show-answer .s-answer { background: #1e293b; border-left-color: #2dd4bf; }
+  .s-answer-title { color: #2dd4bf; }
 }
 @media (min-width: 760px) {
   .slide { padding: 24px 32px; }
   .slide-grid { grid-template-columns: 1fr 1fr; }
   .slide-title { font-size: 24px; }
+  .s-tabs { justify-content: center; grid-template-columns: 180px 180px; }
+  .s-answer p { font-size: 19px; }
   .slides-footer { flex-direction: row; align-items: center; justify-content: center; gap: 24px; }
   .s-timer { width: 380px; }
   .s-nav { width: 280px; }

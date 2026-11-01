@@ -1,11 +1,12 @@
 // 앱 파일을 바꾸면 버전을 올려 캐시를 갱신하세요.
-var CACHE = "ssit-interview-v2";
+var CACHE = "ssit-interview-v3";
 var ASSETS = [
   "./",
   "./index.html",
   "./css/style.css",
   "./js/data.js",
   "./js/slides-data.js",
+  "./js/answers-data.js",
   "./js/slides.js",
   "./js/app.js",
   "./manifest.webmanifest",

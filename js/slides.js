@@ -3,6 +3,7 @@
   "use strict";
 
   var DATA = window.SLIDES_DATA;
+  var ANSWERS = window.ANSWERS_DATA.answers;   // N번 답변 ↔ N장
   var TOTAL_SEC = 180;   // 전체 3분
   var PER_SEC = 60;      // 장당 권장 1분
   var N = DATA.slides.length;
@@ -13,6 +14,7 @@
 
   var pos = 0;
   var active = false;
+  var showAnswer = false;
 
   // ---- 슬라이드 그리기 (문구는 textContent 로 원문 그대로) ----
   function el(tag, cls, text) {
@@ -50,6 +52,13 @@
       grid.appendChild(card);
     });
     slide.appendChild(grid);
+
+    // 발표 답변: 같은 장 안에 전문을 넣고, 보기 전환으로 슬라이드 대신 보여 준다
+    var ans = el("article", "s-answer");
+    ans.appendChild(el("h3", "s-answer-title", ANSWERS[i].title));
+    ANSWERS[i].paragraphs.forEach(function (t) { ans.appendChild(el("p", null, t)); });
+    slide.appendChild(ans);
+
     slide.appendChild(el("footer", "slide-foot", DATA.note));
     track.appendChild(slide);
 
@@ -83,6 +92,19 @@
     });
     renderTimer();
   }
+
+  // ---- 슬라이드 / 발표 답변 전환 (장 위치·타이머는 그대로) ----
+  function setAnswer(on) {
+    showAnswer = on;
+    $("slides").classList.toggle("show-answer", on);
+    $("sTabSlide").setAttribute("aria-pressed", String(!on));
+    $("sTabAnswer").setAttribute("aria-pressed", String(on));
+    $("title").textContent = on ? "발표 답변" : "발표 자료";
+    if (track.children[pos]) track.children[pos].scrollTop = 0;
+    if (active) history.replaceState(null, "", on ? "#/answers" : "#/slides");
+  }
+  $("sTabSlide").addEventListener("click", function () { setAnswer(false); });
+  $("sTabAnswer").addEventListener("click", function () { setAnswer(true); });
 
   $("sPrev").addEventListener("click", function () { go(pos - 1); });
   $("sNext").addEventListener("click", function () { go(pos + 1); });
@@ -183,9 +205,9 @@
   $("sTimerReset").addEventListener("click", timerReset);
 
   window.SlidesMode = {
-    enter: function () {
+    enter: function (answer) {
       active = true;
-      $("title").textContent = "발표 자료";
+      setAnswer(!!answer);
       document.body.classList.add("is-slides");
       render();
     },

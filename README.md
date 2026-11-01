@@ -33,6 +33,7 @@ npx --yes serve .
   목표 시간에 도달하면 빨갛게 바뀌고 한 번 진동하지만 답은 자동으로 열리지 않습니다
 - 이전/다음, 진행 `n/N`, **연습함 표시**(문항마다 켜고 끌 수 있음)
 - **발표 자료(PPT 모드)**: 홈의 「발표 자료」에서 `ppt-slides.md` 3장을 원문 그대로 슬라이드로 보며(스와이프·이전/다음·페이지 도트) 전체 3분 타이머(장당 권장 1분, 자동 넘김 없음)로 연습합니다. md 수정 후 `python3 tools/build-slides.py`
+- **발표 답변**: 홈의 「발표 답변」 또는 발표 화면 상단 「🎤 발표 답변」 탭에서 `ppt-answers.md` 1·2·3번 답변 전문을 원문 그대로 장별로 넘기며 봅니다(장 제목·3분 타이머 유지, 「📊 슬라이드」 탭으로 같은 장 슬라이드 복귀). md 수정 후 `python3 tools/build-answers.py`
 
 ## 질문을 수정했을 때
 `interview-qa.md`를 고친 뒤 데이터 파일을 다시 생성합니다.
@@ -48,6 +49,7 @@ index.html             화면
 css/style.css          스타일 (다크 모드 지원)
 js/data.js             질문·답변 데이터 (자동 생성)
 js/slides-data.js      발표 자료 데이터 (자동 생성)
+js/answers-data.js     발표 답변 데이터 (자동 생성)
 js/slides.js           발표(PPT) 모드
 js/app.js              앱 로직
 sw.js                  서비스 워커 (오프라인)
@@ -55,5 +57,6 @@ manifest.webmanifest   PWA 매니페스트
 icons/                 앱 아이콘
 tools/build-data.py    md → data.js 변환
 tools/build-slides.py  ppt-slides.md → slides-data.js 변환
+tools/build-answers.py ppt-answers.md → answers-data.js 변환
 tools/make-icons.py    아이콘 생성
 ```

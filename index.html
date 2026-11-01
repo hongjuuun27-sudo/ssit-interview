@@ -30,7 +30,7 @@
     </section>
 
     <div class="mode-grid">
-      <button id="shuffleBtn" class="mode-tile">
+      <button id="shuffleBtn" class="mode-tile mode-wide">
         <span class="mode-icon">🔀</span>
         <span class="mode-name">면접 연습</span>
         <span class="mode-sub">전체 섞기 · 아래에서 장 선택</span>
@@ -39,6 +39,11 @@
         <span class="mode-icon">📊</span>
         <span class="mode-name">발표 자료</span>
         <span class="mode-sub">PPT 3장 · 3분</span>
+      </button>
+      <button id="answersBtn" class="mode-tile mode-answers">
+        <span class="mode-icon">🎤</span>
+        <span class="mode-name">발표 답변</span>
+        <span class="mode-sub">1·2·3번 전문 · 장별</span>
       </button>
     </div>
 
@@ -84,6 +89,10 @@
   </main>
 
   <main id="slides" class="slides-view" hidden>
+    <div class="s-tabs" role="group" aria-label="보기 전환">
+      <button id="sTabSlide" class="s-tab" aria-pressed="true">📊 슬라이드</button>
+      <button id="sTabAnswer" class="s-tab" aria-pressed="false">🎤 발표 답변</button>
+    </div>
     <div id="slidesViewport" class="slides-viewport">
       <div id="slidesTrack" class="slides-track"></div>
     </div>
@@ -124,6 +133,7 @@
 
   <script src="js/data.js"></script>
   <script src="js/slides-data.js"></script>
+  <script src="js/answers-data.js"></script>
   <script src="js/slides.js"></script>
   <script src="js/app.js"></script>
 </body>
