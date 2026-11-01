@@ -93,9 +93,11 @@
     renderTimer();
   }
 
-  // ---- 슬라이드 / 발표 답변 전환 (장 위치·타이머는 그대로) ----
+  // ---- 슬라이드 / 발표 답변 전환 (장 위치는 그대로) ----
+  // 발표 답변은 읽기용: 타이머를 멈추고 숨긴다 (슬라이드로 돌아오면 다시 보임)
   function setAnswer(on) {
     showAnswer = on;
+    if (on) timerPause();
     $("slides").classList.toggle("show-answer", on);
     $("sTabSlide").setAttribute("aria-pressed", String(!on));
     $("sTabAnswer").setAttribute("aria-pressed", String(on));
