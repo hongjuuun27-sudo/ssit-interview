@@ -1,5 +1,5 @@
 // 앱 파일을 바꾸면 버전을 올려 캐시를 갱신하세요.
-var CACHE = "ssit-interview-v5";
+var CACHE = "ssit-interview-v6";
 var ASSETS = [
   "./",
   "./index.html",

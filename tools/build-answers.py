@@ -3,7 +3,7 @@
 
 문구는 한 글자도 바꾸지 않습니다. 파싱 결과로 md 를 다시 조립해
 원본과 바이트 단위로 같은지 확인하고, 다르면 실패합니다.
-답변 수는 ppt-slides.md 의 장 수와 같아야 합니다 (N번 답변 ↔ N장).
+답변 수는 ppt-slides.md 의 장 수와 같아야 합니다 (N번 질문: ↔ N장).
 
 사용법: python3 tools/build-answers.py
 """
@@ -48,8 +48,8 @@ def main():
     if rebuild(doc) != text:
         raise SystemExit("원문과 파싱 결과가 다릅니다. 변환을 중단합니다.")
     for i, a in enumerate(doc["answers"], 1):
-        if a["title"] != f"{i}번 답변":
-            raise SystemExit(f"{i}번째 제목이 '{i}번 답변'이 아닙니다: {a['title']!r}")
+        if not a["title"].startswith(f"{i}번 질문:"):
+            raise SystemExit(f"{i}번째 제목이 '{i}번 질문:'으로 시작하지 않습니다: {a['title']!r}")
     n_slides = len(re.findall(r"^## ", SLIDES.read_text(encoding="utf-8"), re.M))
     if len(doc["answers"]) != n_slides:
         raise SystemExit(f"답변 {len(doc['answers'])}개 ≠ 슬라이드 {n_slides}장")
