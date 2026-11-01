@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1d4ed8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SSIT 면접">
+  <title>SSIT 면접 연습</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <button id="backBtn" class="icon-btn" aria-label="홈으로" hidden>‹</button>
+    <h1 id="title">SSIT 면접 연습</h1>
+    <span id="counter" class="counter"></span>
+  </header>
+
+  <main id="home" class="view">
+    <section class="summary card">
+      <div>
+        <div class="summary-label">전체 진도</div>
+        <div class="summary-value"><span id="totalDone">0</span> / <span id="totalCount">0</span></div>
+      </div>
+      <div class="bar"><div id="totalBar" class="bar-fill"></div></div>
+    </section>
+
+    <button id="shuffleBtn" class="btn btn-primary btn-block">🔀 전체 섞기</button>
+
+    <ul id="chapterList" class="chapter-list"></ul>
+
+    <button id="resetProgressBtn" class="btn btn-ghost btn-block">진도 초기화</button>
+  </main>
+
+  <main id="practice" class="view" hidden>
+    <article class="card qcard">
+      <div class="qmeta">
+        <span id="qChapter" class="chip"></span>
+        <span id="qCheck" class="badge-check" hidden>본인 확인</span>
+        <span id="qDone" class="badge-done" hidden>✓ 연습함</span>
+      </div>
+      <h2 id="qText" class="qtext"></h2>
+
+      <button id="toggleAnswerBtn" class="btn btn-outline btn-block" aria-expanded="false">모범답안 보기</button>
+      <div id="answer" class="answer" hidden>
+        <div id="answerLabel" class="answer-label">모범답안</div>
+        <p id="aText"></p>
+      </div>
+    </article>
+
+    <section class="card timer">
+      <div class="timer-row">
+        <div id="timerDisplay" class="timer-display">00:00</div>
+        <div class="timer-target">목표 <span id="targetDisplay">01:30</span></div>
+      </div>
+      <div class="bar"><div id="timerBar" class="bar-fill"></div></div>
+      <div class="presets" role="group" aria-label="목표 시간">
+        <button class="preset" data-sec="60">60초</button>
+        <button class="preset" data-sec="90">90초</button>
+        <button class="preset" data-sec="120">120초</button>
+      </div>
+      <div class="timer-controls">
+        <button id="timerToggle" class="btn btn-primary">▶ 시작</button>
+        <button id="timerReset" class="btn btn-outline">↺ 리셋</button>
+      </div>
+    </section>
+
+    <button id="markDoneBtn" class="btn btn-done btn-block">연습함으로 표시</button>
+  </main>
+
+  <nav id="pager" class="pager" hidden>
+    <button id="prevBtn" class="btn btn-outline">‹ 이전</button>
+    <button id="nextBtn" class="btn btn-primary">다음 ›</button>
+  </nav>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
