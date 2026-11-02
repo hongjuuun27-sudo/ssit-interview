@@ -4,6 +4,7 @@
   var DATA = window.QA_DATA;
   var DONE_KEY = "ssit.done.v1";
   var TARGET_KEY = "ssit.target.v1";
+  var MY_KEY = "ssit.myAnswers.v1";  // { [문항 id]: [{ id, text, at }, ...] } — 진도 초기화와 무관하게 유지
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -26,6 +27,8 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* 저장 불가 환경 무시 */ }
   }
   var done = load(DONE_KEY, {});
+  var myAnswers = load(MY_KEY, {});
+  if (!myAnswers || typeof myAnswers !== "object" || Array.isArray(myAnswers)) myAnswers = {};
 
   // ---- 상태 ----
   var deck = [];       // 현재 연습 중인 문항 배열
@@ -100,6 +103,8 @@
     $("answerLabel").textContent = item.check ? "초안 답변 · 본인 확인 필요" : "모범답안";
     $("answer").classList.toggle("draft", item.check);
     renderAnswer();
+    maEditing = null;
+    renderMy();
     renderDone();
 
     $("prevBtn").disabled = pos === 0;
@@ -120,6 +125,47 @@
     $("markDoneBtn").classList.toggle("is-done", isDone);
   }
 
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        if (!document.execCommand("copy")) reject(new Error("copy failed"));
+        else resolve();
+      } catch (e) { reject(e); }
+      document.body.removeChild(ta);
+    });
+  }
+
+  function flashCopyBtn(ok) {
+    var b = $("copyQBtn");
+    if (!b) return;
+    var prev = b.textContent;
+    b.textContent = ok ? "복사됨 ✓" : "복사 실패";
+    b.classList.toggle("copied", !!ok);
+    clearTimeout(flashCopyBtn._t);
+    flashCopyBtn._t = setTimeout(function () {
+      b.textContent = "질문 복사";
+      b.classList.remove("copied");
+    }, 1400);
+  }
+
+  $("copyQBtn").addEventListener("click", function () {
+    var item = deck[pos];
+    if (!item) return;
+    // 사용자가 붙여넣어 답을 이어서 쓰도록 A. 뒤 공백까지
+    var text = "Q. " + item.q + "\nA. ";
+    copyText(text).then(function () { flashCopyBtn(true); }).catch(function () { flashCopyBtn(false); });
+  });
+
   $("toggleAnswerBtn").addEventListener("click", function () {
     answerOpen = !answerOpen;
     renderAnswer();
@@ -132,10 +178,154 @@
     renderDone();
   });
 
+  // ---- 내 연습 답변 (문항별 여러 버전) ----
+  var maSelected = {};   // 문항 id → 선택한 답변 id (세션 메모리, 없으면 최신)
+  var maEditing = null;  // null | "add" | "edit"
+  var maOpen = true;     // 본문 펼침 (말하기 연습 중 가리기용)
+
+  function myList(qid) {
+    var list = myAnswers[qid];
+    return Array.isArray(list) ? list : [];
+  }
+
+  function maIndex(list, qid) {
+    for (var i = 0; i < list.length; i++) if (list[i].id === maSelected[qid]) return i;
+    return list.length - 1;  // 기본은 최신(마지막)
+  }
+
+  function fmtDate(ms) {
+    var d = new Date(ms);
+    var two = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + "." + two(d.getMonth() + 1) + "." + two(d.getDate()) + " " + two(d.getHours()) + ":" + two(d.getMinutes());
+  }
+
+  function renderMy() {
+    var qid = deck[pos].id;
+    var list = myList(qid);
+    var idx = maIndex(list, qid);
+    var has = list.length > 0;
+    var editing = maEditing !== null;
+
+    $("maCount").textContent = list.length;
+    $("maEmpty").hidden = has || editing;
+    $("maToggle").hidden = !has || editing;
+    $("maToggle").textContent = maOpen ? "숨기기" : "보기";
+    $("maToggle").setAttribute("aria-expanded", String(maOpen));
+
+    var tabs = $("maTabs");
+    tabs.innerHTML = "";
+    tabs.hidden = !has;
+    list.forEach(function (v, i) {
+      var b = document.createElement("button");
+      b.className = "ma-tab";
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", String(i === idx));
+      b.disabled = editing;
+      b.textContent = "버전 " + (i + 1);
+      b.addEventListener("click", function () {
+        maSelected[qid] = v.id;
+        renderMy();
+      });
+      tabs.appendChild(b);
+    });
+    var sel = tabs.children[idx];
+    if (sel) tabs.scrollLeft = Math.max(0, sel.offsetLeft - 8);  // .ma-tabs 는 position: relative
+
+    $("maBody").hidden = !has || !maOpen || maEditing === "edit";
+    if (has) {
+      $("maMeta").textContent = "버전 " + (idx + 1) + " · " + fmtDate(list[idx].at);
+      $("maText").textContent = list[idx].text;
+    }
+
+    $("maEditor").hidden = !editing;
+    $("maActions").hidden = editing;
+    $("maAdd").textContent = has ? "+ 새 버전 추가" : "+ 첫 답변 추가";
+    $("maEdit").hidden = !has;
+    $("maDelete").hidden = !has;
+    $("maActions").classList.toggle("single", !has);
+    $("maClearAll").hidden = !has || editing;
+  }
+
+  function maStartEdit(mode) {
+    var qid = deck[pos].id;
+    var list = myList(qid);
+    maEditing = mode;
+    $("maEditorLabel").textContent = mode === "add"
+      ? "새 버전 " + (list.length + 1)
+      : "버전 " + (maIndex(list, qid) + 1) + " 수정";
+    $("maInput").value = mode === "edit" ? list[maIndex(list, qid)].text : "";
+    $("maSave").disabled = mode === "add";
+    renderMy();
+    $("maInput").focus();
+  }
+
+  // 편집 중 내용이 있으면 떠나기 전에 확인
+  function maCanLeave() {
+    if (maEditing === null) return true;
+    var qid = deck[pos].id;
+    var list = myList(qid);
+    var orig = maEditing === "edit" ? list[maIndex(list, qid)].text : "";
+    if ($("maInput").value === orig) return true;
+    return confirm("저장하지 않은 답변이 있어요. 버리고 이동할까요?");
+  }
+
+  $("maInput").addEventListener("input", function () {
+    $("maSave").disabled = !$("maInput").value.trim();
+  });
+  $("maAdd").addEventListener("click", function () { maStartEdit("add"); });
+  $("maEdit").addEventListener("click", function () { maStartEdit("edit"); });
+  $("maCancel").addEventListener("click", function () {
+    maEditing = null;
+    renderMy();
+  });
+  $("maSave").addEventListener("click", function () {
+    var text = $("maInput").value.trim();
+    if (!text) return;
+    var qid = deck[pos].id;
+    var list = myList(qid).slice();
+    if (maEditing === "add") {
+      var v = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), text: text, at: Date.now() };
+      list.push(v);
+      maSelected[qid] = v.id;
+    } else {
+      var i = maIndex(list, qid);
+      list[i] = { id: list[i].id, text: text, at: Date.now() };
+    }
+    myAnswers[qid] = list;
+    save(MY_KEY, myAnswers);
+    maEditing = null;
+    maOpen = true;
+    renderMy();
+  });
+  $("maDelete").addEventListener("click", function () {
+    var qid = deck[pos].id;
+    var list = myList(qid);
+    var i = maIndex(list, qid);
+    if (!confirm("버전 " + (i + 1) + "을(를) 삭제할까요?")) return;
+    list = list.slice(0, i).concat(list.slice(i + 1));
+    if (list.length) myAnswers[qid] = list; else delete myAnswers[qid];
+    delete maSelected[qid];
+    save(MY_KEY, myAnswers);
+    renderMy();
+  });
+  $("maClearAll").addEventListener("click", function () {
+    var qid = deck[pos].id;
+    if (!confirm("이 질문의 연습 답변 " + myList(qid).length + "개를 모두 삭제할까요?")) return;
+    delete myAnswers[qid];
+    delete maSelected[qid];
+    save(MY_KEY, myAnswers);
+    renderMy();
+  });
+  $("maToggle").addEventListener("click", function () {
+    maOpen = !maOpen;
+    renderMy();
+  });
+
   $("prevBtn").addEventListener("click", function () {
-    if (pos > 0) { pos--; renderQuestion(); }
+    if (pos > 0 && maCanLeave()) { pos--; renderQuestion(); }
   });
   $("nextBtn").addEventListener("click", function () {
+    if (!maCanLeave()) return;
     if (pos < deck.length - 1) { pos++; renderQuestion(); }
     else { location.hash = "#/"; }
   });
@@ -211,7 +401,10 @@
   $("shuffleBtn").addEventListener("click", function () { location.hash = "#/shuffle"; });
   $("slidesBtn").addEventListener("click", function () { location.hash = "#/slides"; });
   $("answersBtn").addEventListener("click", function () { location.hash = "#/answers"; });
-  $("backBtn").addEventListener("click", function () { location.hash = "#/"; });
+  $("backBtn").addEventListener("click", function () {
+    if (!$("practice").hidden && !maCanLeave()) return;
+    location.hash = "#/";
+  });
   $("resetProgressBtn").addEventListener("click", function () {
     if (confirm("연습 진도를 모두 초기화할까요?")) {
       done = {};

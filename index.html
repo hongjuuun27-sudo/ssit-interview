@@ -60,6 +60,7 @@
         <span id="qDone" class="badge-done" hidden>✓ 연습함</span>
       </div>
       <h2 id="qText" class="qtext"></h2>
+      <button id="copyQBtn" class="btn btn-outline btn-block copy-q" type="button">질문 복사</button>
 
       <button id="toggleAnswerBtn" class="btn btn-outline btn-block" aria-expanded="false">모범답안 보기</button>
       <div id="answer" class="answer" hidden>
@@ -67,6 +68,34 @@
         <p id="aText"></p>
       </div>
     </article>
+
+    <section id="myAnswers" class="card my-answers" aria-labelledby="maTitle">
+      <div class="ma-head">
+        <h3 id="maTitle" class="ma-title">내 연습 답변</h3>
+        <span id="maCount" class="ma-count">0</span>
+        <button id="maToggle" class="ma-toggle" aria-expanded="true" aria-controls="maBody">숨기기</button>
+      </div>
+      <p id="maEmpty" class="ma-empty">아직 연습 답변이 없어요. 말해 본 내용을 적어 두면 다음에 골라 연습할 수 있어요.</p>
+      <div id="maTabs" class="ma-tabs" role="tablist" aria-label="연습 답변 버전"></div>
+      <div id="maBody" class="ma-body">
+        <div id="maMeta" class="ma-meta"></div>
+        <p id="maText" class="ma-text"></p>
+      </div>
+      <div id="maEditor" class="ma-editor" hidden>
+        <label id="maEditorLabel" class="ma-editor-label" for="maInput">새 버전</label>
+        <textarea id="maInput" class="ma-input" rows="7" placeholder="말해 본 답변을 적어 두세요"></textarea>
+        <div class="ma-row">
+          <button id="maSave" class="btn btn-primary" disabled>저장</button>
+          <button id="maCancel" class="btn btn-outline">취소</button>
+        </div>
+      </div>
+      <div id="maActions" class="ma-actions">
+        <button id="maAdd" class="btn btn-primary">+ 새 버전 추가</button>
+        <button id="maEdit" class="btn btn-outline">수정</button>
+        <button id="maDelete" class="btn btn-outline btn-danger">삭제</button>
+      </div>
+      <button id="maClearAll" class="btn btn-ghost btn-block ma-clear">이 질문 답변 모두 삭제</button>
+    </section>
 
     <section class="card timer">
       <div class="timer-row">
