@@ -31,7 +31,7 @@
 
     var head = el("header", "slide-head");
     var h = el("h2", "slide-title");
-    // "[1장] 제목" → "[1장]" 부분만 뱃지로 꾸미고 글자는 그대로 둔다
+    // "[1장] 제목" → "[1장]" 부분만 뱃지로 두고 글자는 그대로 둔다
     var m = s.title.match(/^(\[\d+장\])( .*)$/);
     if (m) {
       h.appendChild(el("span", "slide-no", m[1]));
@@ -43,8 +43,8 @@
     slide.appendChild(head);
 
     var grid = el("div", "slide-grid");
-    s.sections.forEach(function (sec, j) {
-      var card = el("article", "s-card s-card-" + (j % 4));
+    s.sections.forEach(function (sec) {
+      var card = el("article", "s-card");
       card.appendChild(el("h3", "s-card-title", sec.title));
       var ul = el("ul", "s-card-list");
       sec.items.forEach(function (t) { ul.appendChild(el("li", null, t)); });
