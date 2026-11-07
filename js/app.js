@@ -29,10 +29,14 @@
   var done = load(DONE_KEY, {});
   var myAnswers = load(MY_KEY, {});
   if (!myAnswers || typeof myAnswers !== "object" || Array.isArray(myAnswers)) myAnswers = {};
+  var important = window.Important.create((function () {
+    try { return window.localStorage; } catch (e) { return null; }
+  })());
 
   // ---- 상태 ----
   var deck = [];       // 현재 연습 중인 문항 배열
   var deckTitle = "";
+  var deckBack = "#/";  // 뒤로/마지막 「완료」 시 돌아갈 화면
   var pos = 0;
   var answerOpen = false;
 
@@ -65,6 +69,7 @@
       list.appendChild(li);
     });
 
+    $("importantCount").textContent = important.filter(ALL).length;
     $("totalDone").textContent = totalDone;
     $("totalCount").textContent = ALL.length;
     $("totalBar").style.width = pct(totalDone, ALL.length) + "%";
@@ -82,10 +87,11 @@
   }
 
   // ---- 연습 ----
-  function startDeck(items, title) {
+  function startDeck(items, title, startPos, back) {
     deck = items;
     deckTitle = title;
-    pos = 0;
+    deckBack = back || "#/";
+    pos = startPos || 0;
     renderQuestion();
   }
 
@@ -106,6 +112,7 @@
     maEditing = null;
     renderMy();
     renderDone();
+    renderStar();
 
     $("prevBtn").disabled = pos === 0;
     $("nextBtn").textContent = pos === deck.length - 1 ? "완료 ✓" : "다음 ›";
@@ -124,6 +131,62 @@
     $("markDoneBtn").textContent = isDone ? "✓ 연습함 (탭하면 해제)" : "연습함으로 표시";
     $("markDoneBtn").classList.toggle("is-done", isDone);
   }
+
+  function renderStar() {
+    var on = important.has(deck[pos].id);
+    $("qStar").textContent = on ? "★" : "☆";
+    $("qStar").setAttribute("aria-pressed", String(on));
+    $("qStar").setAttribute("aria-label", on ? "중요 질문 해제" : "중요 질문으로 표시");
+  }
+
+  // 별을 꺼도 지금 연습 중인 묶음(deck)은 그대로 둔다 — 이전/다음 위치가 흔들리지 않도록
+  $("qStar").addEventListener("click", function () {
+    important.toggle(deck[pos].id);
+    renderStar();
+  });
+
+  // ---- 중요 질문 목록 ----
+  function importantHash(id) { return "#/important/" + encodeURIComponent(id); }
+
+  function renderImportant() {
+    var items = important.filter(ALL);
+    var list = $("impList");
+    list.innerHTML = "";
+    items.forEach(function (item) {
+      var li = document.createElement("li");
+      li.className = "imp-row";
+      var open = document.createElement("button");
+      open.className = "imp-open";
+      open.innerHTML = '<span class="chip"></span><span class="imp-q"></span>';
+      open.querySelector(".chip").textContent = item.chNo + ". " + item.chTitle;
+      open.querySelector(".imp-q").textContent = item.q;
+      open.addEventListener("click", function () { location.hash = importantHash(item.id); });
+      var star = document.createElement("button");
+      star.className = "star-btn";
+      star.type = "button";
+      star.textContent = "★";
+      star.setAttribute("aria-pressed", "true");
+      star.setAttribute("aria-label", "중요 질문 해제");
+      star.addEventListener("click", function () {
+        important.set(item.id, false);
+        renderImportant();
+      });
+      li.appendChild(open);
+      li.appendChild(star);
+      list.appendChild(li);
+    });
+    $("impSummary").textContent = items.length ? "별표한 질문 " + items.length + "개 · 탭하면 그 질문부터 연습" : "";
+    $("impSummary").hidden = !items.length;
+    $("impEmpty").hidden = items.length > 0;
+    $("impPracticeBtn").hidden = !items.length;
+    $("counter").textContent = items.length ? String(items.length) : "";
+  }
+
+  $("impPracticeBtn").addEventListener("click", function () {
+    var items = important.filter(ALL);
+    if (items.length) location.hash = importantHash(items[0].id);
+  });
+  $("impGoHome").addEventListener("click", function () { location.hash = "#/"; });
 
   function copyText(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -327,7 +390,7 @@
   $("nextBtn").addEventListener("click", function () {
     if (!maCanLeave()) return;
     if (pos < deck.length - 1) { pos++; renderQuestion(); }
-    else { location.hash = "#/"; }
+    else { location.hash = deckBack; }
   });
 
   // ---- 타이머 ----
@@ -401,8 +464,13 @@
   $("shuffleBtn").addEventListener("click", function () { location.hash = "#/shuffle"; });
   $("slidesBtn").addEventListener("click", function () { location.hash = "#/slides"; });
   $("answersBtn").addEventListener("click", function () { location.hash = "#/answers"; });
+  $("importantBtn").addEventListener("click", function () { location.hash = "#/important"; });
   $("backBtn").addEventListener("click", function () {
-    if (!$("practice").hidden && !maCanLeave()) return;
+    if (!$("practice").hidden) {
+      if (!maCanLeave()) return;
+      location.hash = deckBack;
+      return;
+    }
     location.hash = "#/";
   });
   $("resetProgressBtn").addEventListener("click", function () {
@@ -418,13 +486,19 @@
     var practice = name === "practice";
     var slides = name === "slides";
     $("home").hidden = name !== "home";
+    $("important").hidden = name !== "important";
     $("practice").hidden = !practice;
     $("slides").hidden = !slides;
     $("pager").hidden = !practice;
     $("backBtn").hidden = name === "home";
     if (slides) { timerReset(); window.SlidesMode.enter(answer); return; }
     window.SlidesMode.leave();
-    if (!practice) {
+    if (name === "important") {
+      timerReset();
+      $("title").textContent = "★ 중요 질문";
+      renderImportant();
+      window.scrollTo(0, 0);
+    } else if (!practice) {
       timerReset();
       $("title").textContent = "SSIT 면접 연습";
       $("counter").textContent = "";
@@ -442,6 +516,22 @@
         startDeck(ALL.filter(function (x) { return x.chNo === ch.no; }), ch.no + ". " + ch.title);
         return;
       }
+    }
+    if (h === "#/important") {
+      showView("important");
+      return;
+    }
+    var im = h.match(/^#\/important\/(.+)$/);
+    if (im) {
+      var id;
+      try { id = decodeURIComponent(im[1]); } catch (e) { id = ""; }
+      var items = important.filter(ALL);
+      var at = -1;
+      for (var i = 0; i < items.length; i++) if (items[i].id === id) at = i;
+      if (at < 0) { location.replace("#/important"); return; }  // 이미 해제된 질문이면 목록으로
+      showView("practice");
+      startDeck(items, "★ 중요 질문", at, "#/important");
+      return;
     }
     if (h === "#/slides" || h === "#/answers") {
       showView("slides", h === "#/answers");

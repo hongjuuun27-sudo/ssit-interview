@@ -45,11 +45,28 @@
         <span class="mode-name">입학지원서</span>
         <span class="mode-sub">1·2·3번 전문 · 장별</span>
       </button>
+      <button id="importantBtn" class="mode-tile mode-wide mode-important">
+        <span class="mode-icon">★</span>
+        <span class="mode-name">중요 질문 <span id="importantCount" class="mode-count">0</span></span>
+        <span class="mode-sub">별표한 질문만 모아 보기 · 전체 장</span>
+      </button>
     </div>
 
     <ul id="chapterList" class="chapter-list"></ul>
 
     <button id="resetProgressBtn" class="btn btn-ghost btn-block">진도 초기화</button>
+  </main>
+
+  <main id="important" class="view" hidden>
+    <p id="impSummary" class="imp-summary"></p>
+    <ul id="impList" class="imp-list"></ul>
+    <section id="impEmpty" class="card imp-empty" hidden>
+      <div class="imp-empty-icon">☆</div>
+      <p class="imp-empty-title">아직 중요 질문이 없어요</p>
+      <p class="imp-empty-sub">연습 화면에서 질문 옆 ☆ 를 누르면 여기에 모여요. 장을 넘나들며 꼭 다시 볼 질문만 골라 연습해 보세요.</p>
+      <button id="impGoHome" class="btn btn-outline btn-block">홈으로</button>
+    </section>
+    <button id="impPracticeBtn" class="btn btn-primary btn-block">★ 중요 질문 순서대로 연습</button>
   </main>
 
   <main id="practice" class="view" hidden>
@@ -58,6 +75,7 @@
         <span id="qChapter" class="chip"></span>
         <span id="qCheck" class="badge-check" hidden>본인 확인</span>
         <span id="qDone" class="badge-done" hidden>✓ 연습함</span>
+        <button id="qStar" class="star-btn" type="button" aria-pressed="false" aria-label="중요 질문으로 표시">☆</button>
       </div>
       <h2 id="qText" class="qtext"></h2>
       <button id="copyQBtn" class="btn btn-outline btn-block copy-q" type="button">질문 복사</button>
@@ -163,6 +181,7 @@
   <script src="js/data.js"></script>
   <script src="js/slides-data.js"></script>
   <script src="js/answers-data.js"></script>
+  <script src="js/important.js"></script>
   <script src="js/slides.js"></script>
   <script src="js/app.js"></script>
 </body>
